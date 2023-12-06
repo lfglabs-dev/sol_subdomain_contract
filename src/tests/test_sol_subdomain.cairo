@@ -122,8 +122,8 @@ fn test_claiming_subdomain() {
 
     sol_subdomain.claim(name, sig, max_validity);
 
-    let addr = resolver.resolve(array![name].span(), 'starknet', array![].span());
-    assert(addr == 0x123, 'Wrong address');
+    let addr = sol_subdomain.was_claimed(name);
+    assert(addr == contract_address_const::<0x123>(), 'Wrong address');
 }
 
 #[test]
@@ -144,6 +144,7 @@ fn test_claiming_subdomain_new_owner() {
     set_block_timestamp(timestamp);
 
     sol_subdomain.claim(name, sig1, max_validity);
+    sol_subdomain.set_resolving(name, 'starknet', caller);
 
     let addr = resolver.resolve(array![name].span(), 'starknet', array![].span());
     assert(addr == 0x123, 'Wrong address');
@@ -156,6 +157,7 @@ fn test_claiming_subdomain_new_owner() {
     let new_owner = contract_address_const::<0x456>();
     set_contract_address(new_owner);
     sol_subdomain.claim(name, sig2, max_validity);
+    sol_subdomain.set_resolving(name, 'starknet', new_owner);
 
     let addr = resolver.resolve(array![name].span(), 'starknet', array![].span());
     assert(addr == 0x456, 'Wrong address');
@@ -208,7 +210,7 @@ fn test_resolving() {
 
     // Buy domain sol
     let id: u128 = 1;
-    let sol_domain: felt252 = 1059716045;
+    let sol_domain: felt252 = 16434;
     // we mint an identity
     identity.mint(id);
 
@@ -233,13 +235,14 @@ fn test_resolving() {
     set_block_timestamp(timestamp);
 
     sol_subdomain.claim(iris_encoded, sig, max_validity);
+    sol_subdomain.set_resolving(iris_encoded, 'starknet', caller);
 
     // It should test resolving through the naming contract
     let addr = naming.resolve(array![iris_encoded, sol_domain].span(), 'starknet', array![].span());
     assert(addr == 0x123, 'Wrong address');
 
     // We update the resolving to a different address
-    sol_subdomain.set_resolving(iris_encoded, contract_address_const::<0x456>());
+    sol_subdomain.set_resolving(iris_encoded, 'starknet', contract_address_const::<0x456>());
 
     // Resolving the address through the naming contract should give us the new address
     let new_addr = naming

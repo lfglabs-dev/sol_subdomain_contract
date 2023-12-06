@@ -21,6 +21,7 @@ mod SolSubdomain {
         admin: ContractAddress,
         server_pub_key: felt252,
         name_owners: LegacyMap::<felt252, ContractAddress>,
+        resolving_mapping: LegacyMap::<felt252, ContractAddress>,
         #[substorage(v0)]
         upgradeable: UpgradeableComponent::Storage,
     }
@@ -28,16 +29,25 @@ mod SolSubdomain {
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        DomainToAddressUpdate: DomainToAddressUpdate,
+        DomainClaimed: DomainClaimed,
+        DomainResolvingUpdate: DomainResolvingUpdate,
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event
     }
 
     #[derive(Drop, starknet::Event)]
-    struct DomainToAddressUpdate {
+    struct DomainClaimed {
         #[key]
         domain: Span<felt252>,
         address: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DomainResolvingUpdate {
+        #[key]
+        domain: Span<felt252>,
+        field: felt252,
+        target_addr: ContractAddress,
     }
 
     #[constructor]
@@ -76,16 +86,31 @@ mod SolSubdomain {
 
             self
                 .emit(
-                    Event::DomainToAddressUpdate(
-                        DomainToAddressUpdate { domain: array![name].span(), address: caller, }
+                    Event::DomainClaimed(
+                        DomainClaimed { domain: array![name, 16434].span(), address: caller, }
                     )
                 )
         }
 
-        fn set_resolving(ref self: ContractState, domain: felt252, new_target: ContractAddress) {
+        fn was_claimed(self: @ContractState, name: felt252) -> ContractAddress {
+            self.name_owners.read(name)
+        }
+
+        fn set_resolving(
+            ref self: ContractState, domain: felt252, field: felt252, new_target: ContractAddress
+        ) {
             let caller = get_caller_address();
             assert(self.name_owners.read(domain) == caller, 'Caller not owner of domain');
-            self.name_owners.write(domain, new_target);
+            self.resolving_mapping.write(domain, new_target);
+
+            self
+                .emit(
+                    Event::DomainResolvingUpdate(
+                        DomainResolvingUpdate {
+                            domain: array![domain, 16434].span(), field, target_addr: new_target,
+                        }
+                    )
+                )
         }
 
         // Admin functions
@@ -106,7 +131,7 @@ mod SolSubdomain {
             self: @ContractState, domain: Span<felt252>, field: felt252, hint: Span<felt252>
         ) -> felt252 {
             let name = *domain.at(0);
-            self.name_owners.read(name).into()
+            self.resolving_mapping.read(name).into()
         }
     }
 
