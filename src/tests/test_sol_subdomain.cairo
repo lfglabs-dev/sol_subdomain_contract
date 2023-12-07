@@ -250,3 +250,32 @@ fn test_resolving() {
     assert(new_addr == 0x456, 'Wrong address');
 }
 
+#[test]
+#[available_gas(20000000000)]
+fn test_were_claimed() {
+     let (erc20, pricing, identity, naming, sol_subdomain, resolver) = deploy();
+    let caller = contract_address_const::<0x123>();
+    set_contract_address(caller);
+
+    let name = 999902; // "iris" encoded
+    let sig = (
+        0x5e2b889fdba808917a242634c835fde23fe82947a808811a7d0e32d0e2bb985,
+        0x6a9c7e22e3f753dc4618e63ccd6c6da403a670fbf2a91263ad9c4c8a5b189fe
+    );
+
+    let max_validity: u64 = 1701167467;
+    let timestamp: u64 = max_validity - 1800; // max_validity - 30 minutes
+    set_block_timestamp(timestamp);
+
+    sol_subdomain.claim(name, sig, max_validity);
+
+    let mut addresses = sol_subdomain.were_claimed(array![name, name].span());
+    loop {
+        if addresses.len() == 0 {
+            break;
+        }
+        let addr = addresses.pop_front().unwrap();
+        assert(addr == contract_address_const::<0x123>(), 'Wrong address');
+    };
+}
+

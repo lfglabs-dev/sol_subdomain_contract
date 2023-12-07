@@ -3,7 +3,7 @@ mod SolSubdomain {
     use starknet::ContractAddress;
     use starknet::{get_caller_address, get_block_timestamp};
     use traits::Into;
-    use array::SpanTrait;
+    use array::{SpanTrait, ArrayTrait};
     use starknet::class_hash::ClassHash;
     use ecdsa::check_ecdsa_signature;
 
@@ -94,6 +94,19 @@ mod SolSubdomain {
 
         fn was_claimed(self: @ContractState, name: felt252) -> ContractAddress {
             self.name_owners.read(name)
+        }
+
+        fn were_claimed(self: @ContractState, names: Span<felt252>) -> Array<ContractAddress> {
+            let mut result: Array<ContractAddress> = array![];
+            let mut names = names;
+            loop {
+                if names.len() == 0 {
+                    break;
+                }
+                let name = names.pop_front().unwrap();
+                result.append(self.name_owners.read(*name));
+            };
+            result
         }
 
         fn set_resolving(
