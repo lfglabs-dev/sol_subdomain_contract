@@ -87,7 +87,7 @@ mod SolSubdomain {
             self
                 .emit(
                     Event::DomainClaimed(
-                        DomainClaimed { domain: array![name, 16434].span(), address: caller, }
+                        DomainClaimed { domain: array![name].span(), address: caller, }
                     )
                 )
         }
@@ -120,7 +120,7 @@ mod SolSubdomain {
                 .emit(
                     Event::DomainResolvingUpdate(
                         DomainResolvingUpdate {
-                            domain: array![domain, 16434].span(), field, target_addr: new_target,
+                            domain: array![domain].span(), field, target_addr: new_target,
                         }
                     )
                 )
