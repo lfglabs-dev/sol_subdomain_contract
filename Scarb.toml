@@ -7,7 +7,7 @@ version = "0.1.0"
 [dependencies]
 starknet = "2.3.1"
 openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", rev = "f3e2a5f0547a429c716f32471b06df729cbdfb9f" }
-naming = { git = "https://github.com/starknet-id/naming.git" }
+naming = { git = "https://github.com/starknet-id/naming.git", rev = "6e45f7fc2bc9e8e9d874a1d2c2d46e3226a96f6d" }
 
 [[target.starknet-contract]]
 # Enable Sierra codegen.
