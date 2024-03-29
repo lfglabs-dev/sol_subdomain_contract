@@ -46,6 +46,7 @@ mod SolSubdomain {
     struct CustomResolverUpdate {
         #[key]
         domain: Span<felt252>,
+        #[key]
         field: felt252,
         target_addr: ContractAddress,
     }
