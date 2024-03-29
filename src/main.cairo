@@ -30,7 +30,7 @@ mod SolSubdomain {
     #[derive(Drop, starknet::Event)]
     enum Event {
         DomainClaimed: DomainClaimed,
-        DomainResolvingUpdate: DomainResolvingUpdate,
+        CustomResolverUpdate: CustomResolverUpdate,
         #[flat]
         UpgradeableEvent: UpgradeableComponent::Event
     }
@@ -43,7 +43,7 @@ mod SolSubdomain {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct DomainResolvingUpdate {
+    struct CustomResolverUpdate {
         #[key]
         domain: Span<felt252>,
         field: felt252,
@@ -118,8 +118,8 @@ mod SolSubdomain {
 
             self
                 .emit(
-                    Event::DomainResolvingUpdate(
-                        DomainResolvingUpdate {
+                    Event::CustomResolverUpdate(
+                        CustomResolverUpdate {
                             domain: array![domain].span(), field, target_addr: new_target,
                         }
                     )
