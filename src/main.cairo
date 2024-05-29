@@ -16,8 +16,6 @@ mod SolSubdomain {
 
     #[storage]
     struct Storage {
-        identity_contract: ContractAddress,
-        naming_contract: ContractAddress,
         admin: ContractAddress,
         server_pub_key: felt252,
         name_owners: LegacyMap::<felt252, ContractAddress>,
@@ -59,8 +57,6 @@ mod SolSubdomain {
         naming_address: ContractAddress,
         pub_key: felt252
     ) {
-        self.identity_contract.write(starknetid_address);
-        self.naming_contract.write(naming_address);
         self.admin.write(admin_address);
         self.server_pub_key.write(pub_key);
     }
